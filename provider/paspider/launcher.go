@@ -17,7 +17,7 @@ const (
 func LaunchBrowserDefault() (*rod.Browser, error) {
 	LogInfo("[pas-launcher] launch browser with default...")
 	if DEBUG {
-		LogInfo("[pos-launcher] debug mode enabled")
+		LogInfo("[pas-launcher] debug mode enabled")
 	}
 	l, err := launcher.New().Headless(!DEBUG).Launch()
 	if err != nil {

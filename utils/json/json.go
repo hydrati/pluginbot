@@ -1,13 +1,13 @@
-package utils
+package json
 
 import (
 	"bytes"
 	"io"
 	"strings"
 
+	strip "github.com/hedhyw/jsoncjson"
 	. "github.com/hyroge/pluginbot/utils/prelude"
 	json "github.com/json-iterator/go"
-	strip "github.com/tinode/jsonco"
 )
 
 func UnmarshalJsoncString(s string, t Any) error {
@@ -48,6 +48,6 @@ func MarshalJsonToWriter(r Any, w io.Writer) error {
 	return json.NewEncoder(w).Encode(r)
 }
 
-func CreateJsonStriper(r io.Reader) strip.ReadOffsetter {
-	return strip.New(r)
+func CreateJsonStriper(r io.Reader) io.Reader {
+	return strip.NewReader(r)
 }

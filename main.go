@@ -1,63 +1,55 @@
 package main
 
 import (
-	"fmt"
-	"os"
-	"sync"
-
+	"github.com/hyroge/pluginbot/config"
 	Spider "github.com/hyroge/pluginbot/provider/paspider"
-	"github.com/hyroge/pluginbot/utils/brand"
+	_ "github.com/hyroge/pluginbot/utils/init"
 	. "github.com/hyroge/pluginbot/utils/prelude"
 )
 
-func init() {
-	brand.DisplayStartup()
-	LogInfo("[init] look up build tools...")
-
-	if _, err := os.Stat("./tools/"); os.IsNotExist(err) {
-		LogError("[init] not found build tools")
-		Must(err)
-	}
-	LogInfo("[init] found build tools")
-	os.Setenv("PATH", os.Getenv("PATH")+";./tools/")
-
+type A struct {
+	A *int
+	B *int
+	C *int
 }
 
 func main() {
-	client := Spider.MustLaunchBrowserDefault()
-	group := &sync.WaitGroup{}
-	group.Add(2)
+	_ = Spider.MustLaunchBrowserDefault()
+	LogInfo("[main] browser ready")
+	LogInfo("%+v", config.FetchBuildConfig())
+	// group := &sync.WaitGroup{}
+	// group.Add(2)
 
-	results := make(chan *Spider.PAEntry, 2)
+	// results := make(chan *Spider.PAEntry, 2)
 
-	worker := func(url string, name string) {
-		defer group.Done()
+	// worker := func(url string, name string) {
+	// 	defer group.Done()
 
-		options := Spider.CreatePageOptions{
-			URL: url,
-		}
-		lang := "Chinese (Simplified)"
+	// 	options := Spider.CreatePageOptions{
+	// 		URL: url,
+	// 	}
+	// 	lang := "Chinese (Simplified)"
 
-		entry, err := Spider.FetchEntry(client, options, lang, name)
-		Must(err) // panic when error
+	// 	entry, err := Spider.FetchEntry(client, options, lang, name)
+	// 	Must(err) // panic when error
 
-		fmt.Printf("got entry: %+v\n", entry)
-		results <- entry
+	// 	fmt.Printf("got entry: %+v\n", entry)
+	// 	results <- entry
 
-	}
+	// }
 
-	go worker("https://portableapps.com/apps/internet/firefox_portable", "firefox")
-	go worker("https://portableapps.com/apps/development/cppcheck-portable", "cppcheck")
-	group.Wait()
-	close(results)
+	// go worker("https://portableapps.com/apps/internet/firefox_portable", "firefox")
+	// go worker("https://portableapps.com/apps/development/cppcheck-portable", "cppcheck")
+	// group.Wait()
+	// close(results)
 
-	fmt.Println()
-	LogInfo("[main] tasks done")
-	fmt.Println("=========================")
+	// fmt.Println()
+	// LogInfo("[main] tasks done")
+	// fmt.Println("=========================")
 
-	for entry := range results {
-		LogInfo("got %+v", entry)
-	}
+	// for entry := range results {
+	// 	LogInfo("got %+v", entry)
+	// }
 
 	// a, err := unarr.NewArchive("test.7z")
 	// if err != nil {
