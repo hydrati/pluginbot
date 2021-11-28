@@ -174,7 +174,7 @@ func (p *PASpider) EncodeUrl(url string) (string, error) {
 		return "", err
 	}
 
-	LogInfo("[pas, %s] ok, encoded url to string")
+	LogInfo("[pas, %s] ok, encoded url to string", p.name)
 	return obj.Value.String(), nil
 }
 
@@ -320,7 +320,7 @@ func (p *PASpider) GetLocalizationDownloads() (PALocalizationDownloadEntryMap, e
 		}
 
 		m[lang] = &PALocalizationDownloadEntry{Lang: lang, Link: link, Hash: hash}
-		LogInfo("[pas, %s] got table item %d, \n%+v", p.name, i, m[lang])
+		LogInfo("[pas, %s] got table item %d, %+v", p.name, i, lang)
 	}
 
 	LogInfo("[pas, %s] got localization download links entries", p.name)

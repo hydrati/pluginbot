@@ -33,5 +33,5 @@ func DisplayStartup() {
 
 	AUTHOR_STYLE.Println(AUTHOR)
 	fmt.Printf("\n")
-	LogInfo("[main] startup")
+	LogInfo("[init] startup")
 }

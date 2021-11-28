@@ -7,7 +7,7 @@ import (
 
 func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, name string) (*PAEntry, error) {
 	LogInfo("[pas, %s] start spider task", name)
-	spider, err := New(client, opts, "firefox")
+	spider, err := New(client, opts, name)
 	if err != nil {
 		LogError("[pas, %s] create spider error", name)
 		return nil, err
@@ -21,7 +21,7 @@ func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, na
 		return nil, err
 	}
 
-	entry := &PAEntry{}
+	entry := &PAEntry{Name: name}
 
 	ver, err := spider.GetVersion()
 	if err != nil {

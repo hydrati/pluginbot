@@ -9,6 +9,7 @@ type PALocalizationDownloadEntry struct {
 type PALocalizationDownloadEntryMap map[string]*PALocalizationDownloadEntry
 
 type PAEntry struct {
+	Name    string `json:"name"`
 	Version string `json:"version"`
 	Hash    string `json:"hash"`
 	Url     string `json:"url"`
