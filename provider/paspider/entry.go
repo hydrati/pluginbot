@@ -13,6 +13,8 @@ func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, na
 		return nil, err
 	}
 
+	defer spider.ClosePage()
+
 	err = spider.WaitPageReady()
 	if err != nil {
 		LogError("[pas, %s] wait page error", name)

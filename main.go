@@ -3,8 +3,8 @@ package main
 import (
 	"fmt"
 
-	"github.com/hyroge/pluginbot/brand"
 	Spider "github.com/hyroge/pluginbot/provider/paspider"
+	"github.com/hyroge/pluginbot/utils/brand"
 	. "github.com/hyroge/pluginbot/utils/prelude"
 )
 

@@ -12,8 +12,13 @@ import (
 )
 
 var (
-	ERR_NOT_FOUND_PAGE_OBJ = errors.New("not found page object")
-	REXP_VERSION_PATTERN   = regexp.MustCompile(`\d+.\d+(.\d+)*`)
+	ERR_NOT_FOUND_MD5            = errors.New("not found vaild md5")
+	ERR_NOT_FOUND_PAGE_OBJ       = errors.New("not found page object")
+	ERR_NOT_FOUND_LOCAL_DL_TABLE = errors.New("not found localization download table")
+
+	REXP_VERSION_PATTERN     = regexp.MustCompile(`\d+.\d+(.\d+)*`)
+	REXP_REDIRECT_DL_PATTERN = regexp.MustCompile(`/downloading/`)
+	REXP_MD5_PATTERN         = regexp.MustCompile(`([a-zA-Z0-9]+)(\s?)+$`)
 )
 
 type PASpider struct {
@@ -133,10 +138,6 @@ func (p *PASpider) GetDownloadBox() (*rod.Element, error) {
 	return page.Element(".download-box")
 }
 
-var (
-	ERR_NOT_FOUND_LOCAL_DL_TABLE = errors.New("not found localization download table")
-)
-
 func (p *PASpider) GetLocalizationDownloadTable() (*rod.Element, error) {
 	page, err := p.GetPage()
 	if err != nil {
@@ -177,10 +178,6 @@ func (p *PASpider) EncodeUrl(url string) (string, error) {
 	return obj.Value.String(), nil
 }
 
-var (
-	REXP_REDIRECT_DL_PATTERN = regexp.MustCompile(`/downloading/`)
-)
-
 func (p *PASpider) GetRealDownloadUrl(href string) (string, error) {
 	origin, err := p.GetLocationOrigin()
 	if err != nil {
@@ -218,11 +215,6 @@ func (p *PASpider) GetFirstDownloadUrl() (string, error) {
 	LogInfo("[pas, %s] get href: %s, converting", p.name, href)
 	return p.GetRealDownloadUrl(*href)
 }
-
-var (
-	REXP_MD5_PATTERN  = regexp.MustCompile(`([a-zA-Z0-9]+)(\s?)+$`)
-	ERR_NOT_FOUND_MD5 = errors.New("not found vaild md5")
-)
 
 func (p *PASpider) GetFirstMD5() (string, error) {
 	page, err := p.GetPage()
