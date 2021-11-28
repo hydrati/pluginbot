@@ -28,6 +28,6 @@
       自动从 PA 软件包生成
   - [ ] `external`
     外置构建模块
-- [x] `publisher`
+- [ ] `publisher`
   用于打包并发布模块，可上传至云端。
   
