@@ -5,7 +5,7 @@ import (
 	. "github.com/hyroge/pluginbot/utils/prelude"
 )
 
-func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, name string) (*PAEntry, error) {
+func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, name string) (*SpiderResult, error) {
 	LogInfo("[pas, %s] start spider task", name)
 	spider, err := New(client, opts, name)
 	if err != nil {
@@ -21,7 +21,7 @@ func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, na
 		return nil, err
 	}
 
-	entry := &PAEntry{Name: name}
+	entry := &SpiderResult{}
 
 	ver, err := spider.GetVersion()
 	if err != nil {

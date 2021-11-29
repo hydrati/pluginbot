@@ -10,7 +10,7 @@
   // 构建文件夹
   "dirBuilds": "./builds",
   // 数据库路径
-  "pathDatabase": "./database.json",
+  "pathDatabase": "./tests/example.database.json",
   // 最大构建数
   "maxBuildsNum": 1,
   // 远程主机名

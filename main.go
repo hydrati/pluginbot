@@ -1,10 +1,13 @@
 package main
 
 import (
+	"os"
+
 	"github.com/hyroge/pluginbot/config"
 	Spider "github.com/hyroge/pluginbot/provider/paspider"
-	_ "github.com/hyroge/pluginbot/utils/init"
 	"github.com/hyroge/pluginbot/utils/output"
+
+	_ "github.com/hyroge/pluginbot/utils/init"
 	. "github.com/hyroge/pluginbot/utils/prelude"
 )
 
@@ -19,6 +22,18 @@ func main() {
 	LogInfo("[main] browser ready")
 	LogInfo("%+v", config.FetchBuildConfig())
 	LogInfo("%s", output.BaroPrintByTimes("Firefox", 15, 0))
+
+	cfg := config.FetchBuildConfig()
+
+	f, err := os.Open(cfg.BuildInfoPath)
+	Must(err)
+	defer f.Close()
+
+	db, err := config.UnmarshalBuildInfoList(f)
+	Must(err)
+
+	db.PrintBarometer()
+
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
 

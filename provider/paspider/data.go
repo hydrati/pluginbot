@@ -8,9 +8,8 @@ type PALocalizationDownloadEntry struct {
 
 type PALocalizationDownloadEntryMap map[string]*PALocalizationDownloadEntry
 
-type PAEntry struct {
-	Name    string `json:"name"`
+type SpiderResult struct {
 	Version string `json:"version"`
-	Hash    string `json:"hash"`
+	Hash    string `json:"hash"` // MD5
 	Url     string `json:"url"`
 }

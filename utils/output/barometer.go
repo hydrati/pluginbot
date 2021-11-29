@@ -21,6 +21,8 @@ var (
 	BARO_WEATHER_OVERCAST_STYLE      = color.New(color.FgHiYellow)
 	BARO_WEATHER_RAINY_STYLE         = color.New(color.FgYellow)
 	BARO_WEATHER_THUNDER_STORM_STYLE = color.New(color.FgRed, color.Bold)
+
+	BAROMETER_TITLE = color.New(color.Bold).Sprint(("Build Barometer:"))
 )
 
 func (b BarometerWeather) String() string {
@@ -59,13 +61,14 @@ func (b BarometerWeather) GetTextStyle() *color.Color {
 	return style
 }
 
-func (b BarometerWeather) Print(name string, successTime uint, failureTime uint) string {
+func (b BarometerWeather) Print(name string, successTime int, failureTime int) string {
 	style := b.GetTextStyle()
-	text := style.Sprintf("%s  (%d/%d)", name, successTime, successTime+failureTime)
+
+	text := style.Sprintf("%s    (%d/%d)", name, successTime, successTime+failureTime)
 	return b.String() + "  " + text
 }
 
-func BaroByTimes(successTime uint, failureTime uint) BarometerWeather {
+func BaroByTimes(successTime int, failureTime int) BarometerWeather {
 	if failureTime == 0 {
 		return BARO_WEATHER_SUNNY
 	} else if successTime == 0 {
@@ -81,6 +84,6 @@ func BaroByTimes(successTime uint, failureTime uint) BarometerWeather {
 	}
 }
 
-func BaroPrintByTimes(name string, successTime uint, failureTime uint) string {
+func BaroPrintByTimes(name string, successTime int, failureTime int) string {
 	return BaroByTimes(successTime, failureTime).Print(name, successTime, failureTime)
 }

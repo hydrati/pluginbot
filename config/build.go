@@ -12,10 +12,10 @@ var config *BuildConfig
 type BuildConfig struct {
 	EnableRemote   bool     `json:"enableRemote"`
 	IgnoreRemote   bool     `json:"ignoreRemote"`
-	DirTasks       string   `json:"dirTasks"`
-	DirWorkshop    string   `json:"dirWorkshop"`
-	DirBuilds      string   `json:"dirBuilds"`
-	PathDatabase   string   `json:"pathDatabase"`
+	TasksPath      string   `json:"dirTasks"`
+	WorkspacePath  string   `json:"dirWorkshop"`
+	DistPath       string   `json:"dirBuilds"`
+	BuildInfoPath  string   `json:"pathDatabase"`
 	MaxBuildsNum   uint     `json:"maxBuildsNum"`
 	RemoteName     string   `json:"remoteName"`
 	RemoteRoot     string   `json:"remoteRoot"`
