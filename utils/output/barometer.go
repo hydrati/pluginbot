@@ -81,6 +81,6 @@ func BaroByTimes(successTime uint, failureTime uint) BarometerWeather {
 	}
 }
 
-func BaroPrintByTimes(name string, successTime uint, failureTime uint) {
-	BaroByTimes(successTime, failureTime).Print(name, successTime, failureTime)
+func BaroPrintByTimes(name string, successTime uint, failureTime uint) string {
+	return BaroByTimes(successTime, failureTime).Print(name, successTime, failureTime)
 }

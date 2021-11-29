@@ -4,6 +4,7 @@ import (
 	"github.com/hyroge/pluginbot/config"
 	Spider "github.com/hyroge/pluginbot/provider/paspider"
 	_ "github.com/hyroge/pluginbot/utils/init"
+	"github.com/hyroge/pluginbot/utils/output"
 	. "github.com/hyroge/pluginbot/utils/prelude"
 )
 
@@ -17,6 +18,7 @@ func main() {
 	_ = Spider.MustLaunchBrowserDefault()
 	LogInfo("[main] browser ready")
 	LogInfo("%+v", config.FetchBuildConfig())
+	LogInfo("%s", output.BaroPrintByTimes("Firefox", 15, 0))
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
 
