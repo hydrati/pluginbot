@@ -5,6 +5,7 @@ import (
 
 	"github.com/hyroge/pluginbot/config"
 	Spider "github.com/hyroge/pluginbot/provider/paspider"
+	"github.com/hyroge/pluginbot/utils/fs"
 	"github.com/hyroge/pluginbot/utils/output"
 
 	_ "github.com/hyroge/pluginbot/utils/init"
@@ -33,7 +34,10 @@ func main() {
 	Must(err)
 
 	db.PrintBarometer()
-
+	fs.CopyDirRecursive("vendor", "vendor2", false)
+	v, err := fs.ReadDirRecursive("vendor")
+	Must(err)
+	LogInfo("%+v, %+v", v)
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
 
