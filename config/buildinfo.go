@@ -27,6 +27,15 @@ type BuildInfoItem struct {
 	RecentStatus  []*BuildRecentStatus `json:"recentStatus"`
 }
 
+func (i *BuildInfoItem) PushRecentStatus(info *BuildRecentStatus, max int) []*BuildRecentStatus {
+	if len(i.RecentStatus) >= max {
+		i.RecentStatus = append(i.RecentStatus[0:max-1], info)
+	} else {
+		i.RecentStatus = append(i.RecentStatus, info)
+	}
+	return i.RecentStatus
+}
+
 func (i *BuildInfoItem) GetBuildTimes() int {
 	return len(i.RecentStatus)
 }

@@ -7,6 +7,7 @@ import (
 	"github.com/hyroge/pluginbot/build/task"
 	"github.com/hyroge/pluginbot/config"
 	Spider "github.com/hyroge/pluginbot/provider/paspider"
+	"github.com/hyroge/pluginbot/utils/json"
 	"github.com/hyroge/pluginbot/utils/output"
 	"github.com/hyroge/pluginbot/utils/slices"
 
@@ -35,10 +36,19 @@ func main() {
 	db, err := config.UnmarshalBuildInfoList(f)
 	Must(err)
 
+	(*db)["Rufus"].PushRecentStatus(&config.BuildRecentStatus{
+		Time:            1,
+		TimeDescription: "114514",
+		Success:         false,
+		ErrorMessage:    "homo",
+	}, 3)
+
 	db.PrintBarometer()
 	// fs.CopyDirRecursive("vendor", "vendor2", false)
 	// _, err = fs.ReadDirRecursive("vendor")
 	// Must(err)
+
+	fmt.Println(json.MarshalJsonToString(db))
 	s := []string{"a", "ss", "bb"}
 	LogInfo("%+v", slices.IncludeInSliceString(s, "ss"))
 	fmt.Println(task.CheckResolveTaskFromPath("./tests/example.pa-task.json"))
