@@ -2,7 +2,6 @@ package paspider
 
 import (
 	"fmt"
-	"strings"
 
 	"github.com/go-rod/rod"
 	"github.com/go-rod/rod/lib/proto"
@@ -39,7 +38,7 @@ func (p *PASpider) GetRealDownloadUrl(href string) (string, error) {
 		return "", err
 	}
 
-	u := origin + strings.Clone(href)
+	u := origin + href
 	LogInfo("[pas, %s] original download url: %s", p.name, u)
 
 	r := REXP_REDIRECT_DL_PATTERN.ReplaceAllString(u, `/redirect/`)
