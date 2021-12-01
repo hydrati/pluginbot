@@ -6,15 +6,17 @@ import (
 
 	"github.com/hyroge/pluginbot/config"
 	"github.com/hyroge/pluginbot/utils/fs"
-	// . "github.com/hyroge/pluginbot/utils/prelude"
+	. "github.com/hyroge/pluginbot/utils/prelude"
+	"github.com/hyroge/pluginbot/utils/slices"
 )
 
 var (
 	ERR_CANNOT_ACCESS       = errors.New("cannot access the path")
+	ERR_INVALID_CATE        = errors.New("invalid category")
 	ERR_TASK_NAME_NOT_EQUAL = errors.New("the task name in path is not equal to the task name in config")
 )
 
-func ResolveTaskSpace(name string) (*config.Task, error) {
+func CheckResolveTaskFromFolder(name string) (*config.Task, error) {
 	cfg := config.FetchBuildConfig()
 	task_path := path.Join(cfg.TasksPath, name)
 	task_cfg := path.Join(task_path, "config.json")
@@ -23,7 +25,7 @@ func ResolveTaskSpace(name string) (*config.Task, error) {
 		return nil, ERR_CANNOT_ACCESS
 	}
 
-	task, err := config.ResolveTaskFromPath(task_cfg)
+	task, err := CheckResolveTaskFromPath(task_cfg)
 	if err != nil {
 		return nil, err
 	}
@@ -32,13 +34,24 @@ func ResolveTaskSpace(name string) (*config.Task, error) {
 		return nil, ERR_TASK_NAME_NOT_EQUAL
 	}
 
-	if task.ExternalScraper != nil && *task.ExternalScraper {
+	return task, nil
+}
+
+func CheckResolveTaskFromPath(p string) (*config.Task, error) {
+	task, err := config.ResolveTaskFromPath(p)
+	if err != nil {
+		return nil, err
+	}
+
+	if IsNil(task.ExternalScraper) && *task.ExternalScraper {
 		if err = CheckExternalScraperOptions(task); err != nil {
 			return nil, err
 		}
 	}
 
-	// TODO: check category
+	if !slices.IncludeInSliceString(config.TASK_CATEGORIES, task.Category) {
+		return nil, ERR_INVALID_CATE
+	}
 
 	return task, nil
 }
@@ -55,7 +68,8 @@ func CheckExternalScraperOptions(task *config.Task) error {
 		if task.ExternalScraperOptions.Policy == nil {
 			return ERR_ES_CFG_NEED_POLICY
 		}
-		if *task.ExternalScraperOptions.Policy != config.ES_POLICY_MANUAL || *task.ExternalScraperOptions.Policy != config.ES_POLICY_SILENT {
+		x := *(task.ExternalScraperOptions.Policy) != config.ES_POLICY_MANUAL
+		if x || *(task.ExternalScraperOptions.Policy) != config.ES_POLICY_SILENT {
 			return ERR_ES_CFG_UNKNOWN_POLICY
 		}
 	} else {

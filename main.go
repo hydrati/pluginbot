@@ -1,8 +1,10 @@
 package main
 
 import (
+	"fmt"
 	"os"
 
+	"github.com/hyroge/pluginbot/build/task"
 	"github.com/hyroge/pluginbot/config"
 	Spider "github.com/hyroge/pluginbot/provider/paspider"
 	"github.com/hyroge/pluginbot/utils/output"
@@ -39,6 +41,7 @@ func main() {
 	// Must(err)
 	s := []string{"a", "ss", "bb"}
 	LogInfo("%+v", slices.IncludeInSliceString(s, "ss"))
+	fmt.Println(task.CheckResolveTaskFromPath("./tests/example.pa-task.json"))
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
 
