@@ -29,9 +29,9 @@ type BuildInfoItem struct {
 
 func (i *BuildInfoItem) PushRecentStatus(info *BuildRecentStatus, max int) []*BuildRecentStatus {
 	if len(i.RecentStatus) >= max {
-		i.RecentStatus = append(i.RecentStatus[0:max-1], info)
+		i.RecentStatus = append([]*BuildRecentStatus{info}, i.RecentStatus[0:max-1]...)
 	} else {
-		i.RecentStatus = append(i.RecentStatus, info)
+		i.RecentStatus = append([]*BuildRecentStatus{info}, i.RecentStatus...)
 	}
 	return i.RecentStatus
 }
