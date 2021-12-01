@@ -7,9 +7,11 @@ import (
 	"github.com/hyroge/pluginbot/build/task"
 	"github.com/hyroge/pluginbot/config"
 	Spider "github.com/hyroge/pluginbot/provider/paspider"
+	"github.com/hyroge/pluginbot/utils/aria2"
 	"github.com/hyroge/pluginbot/utils/json"
 	"github.com/hyroge/pluginbot/utils/output"
 	"github.com/hyroge/pluginbot/utils/slices"
+	"github.com/zyxar/argo/rpc"
 
 	_ "github.com/hyroge/pluginbot/utils/init"
 	. "github.com/hyroge/pluginbot/utils/prelude"
@@ -52,6 +54,25 @@ func main() {
 	s := []string{"a", "ss", "bb"}
 	LogInfo("%+v", slices.IncludeInSliceString(s, "ss"))
 	fmt.Println(task.CheckResolveTaskFromPath("./tests/example.pa-task.json"))
+	client, err := aria2.NewClient(aria2.RpcOptions{
+		Host:      "localhost",
+		Port:      6800,
+		Secret:    "edgeless",
+		Transport: "ws",
+		Timeout:   "1s",
+		Notifier:  rpc.DummyNotifier{},
+	})
+
+	Must(err)
+
+	guard, err := client.GetClient()
+	Must(err)
+	defer guard.Close()
+
+	ver, err := guard.Get().GetVersion()
+	Must(err)
+	LogInfo("%+v", ver)
+
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
 
