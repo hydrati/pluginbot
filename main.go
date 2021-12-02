@@ -80,7 +80,7 @@ func main() {
 		return true
 	})
 
-	_, err := guard.Get().AddURI([]string{"https://zfile.edgeless.top/s/ub3caa"})
+	_, err = guard.Get().AddURI([]string{"https://zfile.edgeless.top/s/ub3caa"})
 
 	Must(err)
 
