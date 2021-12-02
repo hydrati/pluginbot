@@ -6,12 +6,12 @@ import (
 
 	"github.com/hyroge/pluginbot/build/task"
 	"github.com/hyroge/pluginbot/config"
-	Spider "github.com/hyroge/pluginbot/provider/paspider"
+	"github.com/hyroge/pluginbot/provider/paspider"
 	"github.com/hyroge/pluginbot/utils/aria2"
+	"github.com/hyroge/pluginbot/utils/aria2/notifier"
 	"github.com/hyroge/pluginbot/utils/json"
 	"github.com/hyroge/pluginbot/utils/output"
 	"github.com/hyroge/pluginbot/utils/slices"
-	"github.com/zyxar/argo/rpc"
 
 	_ "github.com/hyroge/pluginbot/utils/init"
 	. "github.com/hyroge/pluginbot/utils/prelude"
@@ -24,7 +24,7 @@ type A struct {
 }
 
 func main() {
-	_ = Spider.MustLaunchBrowserDefault()
+	_ = paspider.MustLaunchBrowserDefault()
 	LogInfo("[main] browser ready")
 	LogInfo("%+v", config.FetchBuildConfig())
 	LogInfo("%s", output.BaroPrintByTimes("Firefox", 15, 0))
@@ -54,13 +54,15 @@ func main() {
 	s := []string{"a", "ss", "bb"}
 	LogInfo("%+v", slices.IncludeInSliceString(s, "ss"))
 	fmt.Println(task.CheckResolveTaskFromPath("./tests/example.pa-task.json"))
+
+	handle := notifier.NewCallbackNotifier()
 	client, err := aria2.NewClient(aria2.RpcOptions{
 		Host:      "localhost",
 		Port:      6800,
 		Secret:    "edgeless",
 		Transport: "ws",
 		Timeout:   "1s",
-		Notifier:  rpc.DummyNotifier{},
+		Notifier:  handle,
 	})
 
 	Must(err)
@@ -73,20 +75,31 @@ func main() {
 	Must(err)
 	LogInfo("%+v", ver)
 
+	w := handle.CreateWaiter("DownloadStart", func(ev *notifier.NotifierEvent) bool {
+		fmt.Printf("hhh: %+v\n", ev)
+		return true
+	})
+
+	_, err := guard.Get().AddURI([]string{"https://zfile.edgeless.top/s/ub3caa"})
+
+	Must(err)
+
+	fmt.Println(w())
+
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
 
-	// results := make(chan *Spider.PAEntry, 2)
+	// results := make(chan *paspider.PAEntry, 2)
 
 	// worker := func(url string, name string) {
 	// 	defer group.Done()
 
-	// 	options := Spider.CreatePageOptions{
+	// 	options := paspider.CreatePageOptions{
 	// 		URL: url,
 	// 	}
 	// 	lang := "Chinese (Simplified)"
 
-	// 	entry, err := Spider.FetchEntry(client, options, lang, name)
+	// 	entry, err := paspider.FetchEntry(client, options, lang, name)
 	// 	Must(err) // panic when error
 
 	// 	fmt.Printf("got entry: %+v\n", entry)

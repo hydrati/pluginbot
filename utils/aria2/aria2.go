@@ -11,16 +11,6 @@ import (
 	"github.com/zyxar/argo/rpc"
 )
 
-type NotifierFunc func([]rpc.Notifier)
-type DefaultNotifier struct {
-	OnDownloadStart      NotifierFunc
-	OnDownloadPause      NotifierFunc
-	OnDownloadStop       NotifierFunc
-	OnDownloadError      NotifierFunc
-	OnDownloadComplete   NotifierFunc
-	OnBtDownloadComplete NotifierFunc
-}
-
 var (
 	ERR_RPC_CLOSED      = errors.New("rpc closed")
 	ERR_CLIENT_UNLOCKED = errors.New("client unlocked")
@@ -76,6 +66,7 @@ type RpcGuard struct {
 func NewClient(opts RpcOptions) (*RpcGuard, error) {
 	ctx, cancel := context.WithCancel(context.Background())
 	uri := fmt.Sprintf("%s://%s:%d/jsonrpc", opts.Transport, opts.Host, opts.Port)
+
 	timeout, err := time.ParseDuration(opts.Timeout)
 	if err != nil {
 		return nil, err
