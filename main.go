@@ -77,7 +77,7 @@ func main() {
 	go func() {
 		guard, err := client.GetClient()
 		Must(err)
-		defer guard.Close() // unlock client
+		defer guard.Close() // unlock client!
 
 		ver, err := guard.Get().GetVersion()
 		Must(err)
@@ -89,8 +89,8 @@ func main() {
 
 	fmt.Println(w())
 
-	defer Must(client.Close())
-	defer Must(cmd.Close())
+	defer Must(client.Close()) // close rpc client
+	defer Must(cmd.Close())    // close process at last
 
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
