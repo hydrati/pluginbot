@@ -19,7 +19,7 @@ type BuildConfig struct {
 	MaxBuildsNum   uint     `json:"maxBuildsNum"`
 	RemoteName     string   `json:"remoteName"`
 	RemoteRoot     string   `json:"remoteRoot"`
-	Aria2Port      uint16   `json:"aria2Port"`
+	Aria2Port      uint     `json:"aria2Port"`
 	Aria2Host      string   `json:"aria2Host"`
 	Aria2Secret    string   `json:"aria2Secret"`
 	Aria2SpawnArgs []string `json:"aria2SpawnArgs"`

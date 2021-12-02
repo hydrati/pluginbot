@@ -55,36 +55,42 @@ func main() {
 	LogInfo("%+v", slices.IncludeInSliceString(s, "ss"))
 	fmt.Println(task.CheckResolveTaskFromPath("./tests/example.pa-task.json"))
 
+	cmd := aria2.NewCmd("tools/aria2c.exe", cfg.Aria2SpawnArgs)
+	Must(cmd.Start())
+
 	handle := notifier.NewCallbackNotifier()
 	client, err := aria2.NewClient(aria2.RpcOptions{
-		Host:      "localhost",
-		Port:      6800,
-		Secret:    "edgeless",
+		Host:      cfg.Aria2Host,
+		Port:      cfg.Aria2Port,
+		Secret:    cfg.Aria2Secret,
 		Transport: "ws",
 		Timeout:   "1s",
 		Notifier:  handle,
 	})
-
 	Must(err)
-
-	guard, err := client.GetClient()
-	Must(err)
-	defer guard.Close()
-
-	ver, err := guard.Get().GetVersion()
-	Must(err)
-	LogInfo("%+v", ver)
 
 	w := handle.CreateWaiter("DownloadStart", func(ev *notifier.NotifierEvent) bool {
 		fmt.Printf("hhh: %+v\n", ev)
 		return true
 	})
 
-	_, err = guard.Get().AddURI([]string{"https://zfile.edgeless.top/s/ub3caa"})
+	go func() {
+		guard, err := client.GetClient()
+		Must(err)
+		defer guard.Close() // unlock client
 
-	Must(err)
+		ver, err := guard.Get().GetVersion()
+		Must(err)
+		LogInfo("%+v", ver)
+
+		_, err = guard.Get().AddURI([]string{"https://zfile.edgeless.top/s/ub3caa"})
+		Must(err)
+	}()
 
 	fmt.Println(w())
+
+	defer Must(client.Close())
+	defer Must(cmd.Close())
 
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
