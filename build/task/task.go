@@ -1,7 +1,9 @@
 package task
 
 import (
+	"container/list"
 	"errors"
+	"os"
 	"path"
 
 	"github.com/hyroge/pluginbot/config"
@@ -16,7 +18,40 @@ var (
 	ERR_TASK_NAME_NOT_EQUAL = errors.New("the task name in path is not equal to the task name in config")
 )
 
-func CheckResolveTaskFromFolder(name string) (*config.Task, error) {
+func CheckResolveAllTaskInTasksFolder() (*list.List /* List[*Task] */, error) {
+	cfg := config.FetchBuildConfig()
+	return CheckResolveAllTaskInFolder(cfg.TasksPath)
+}
+
+func CheckResolveAllTaskInFolder(p string) (*list.List /* List[*Task] */, error) {
+	if e, err := fs.IsDirectory(p); err != nil || !e {
+		return nil, fs.ERR_INVALID_DIR
+	}
+
+	entries, err := os.ReadDir(p)
+	if err != nil {
+		return nil, err
+	}
+
+	tasks := list.New()
+
+	for _, entry := range entries {
+		if entry.IsDir() {
+			task, err := CheckResolveTaskFromTasksFolder(entry.Name())
+			if err != nil {
+				return nil, err
+			}
+
+			tasks.PushBack(task)
+		} else {
+			continue
+		}
+	}
+
+	return tasks, nil
+}
+
+func CheckResolveTaskFromTasksFolder(name string) (*config.Task, error) {
 	cfg := config.FetchBuildConfig()
 	task_path := path.Join(cfg.TasksPath, name)
 	task_cfg := path.Join(task_path, "config.json")
