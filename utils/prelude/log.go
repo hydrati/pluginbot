@@ -13,6 +13,7 @@ var (
 	LOG_ERROR = color.New(color.FgRed).Add(color.Bold)
 
 	LOG_INFO_HEADER  = LOG_INFO.Sprint("[INFO]")
+	LOG_DEBUG_HEADER = LOG_INFO.Sprint("[DEBUG]")
 	LOG_WARN_HEADER  = LOG_WARN.Sprint("[WARN]")
 	LOG_ERROR_HEADER = LOG_ERROR.Sprint("[ERRO]")
 )
@@ -21,6 +22,14 @@ func LogInfo(f string, i ...interface{}) {
 	t := time.Now().UTC().Format(time.RFC3339)
 	s := fmt.Sprintf(f, i...)
 	fmt.Printf("%s %v: %s\n", LOG_INFO_HEADER, t, s)
+}
+
+func LogDebug(f string, i ...interface{}) {
+	if FetchCmdArgs().Debug {
+		t := time.Now().UTC().Format(time.RFC3339)
+		s := fmt.Sprintf(f, i...)
+		fmt.Printf("%s %v: %s\n", LOG_DEBUG_HEADER, t, s)
+	}
 }
 
 func LogWarn(f string, i ...interface{}) {

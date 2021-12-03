@@ -7,19 +7,19 @@ import (
 )
 
 func (p *PASpider) ClosePage() error {
-	LogInfo("[pas, %s] close page", p.name)
+	LogDebug("[pas, %s] close page", p.name)
 	err := p.page.Close()
 	p.page = nil
 	return err
 }
 
 func (p *PASpider) GetPage() (*rod.Page, error) {
-	LogInfo("[pas, %s] try to get page controller", p.name)
+	LogDebug("[pas, %s] try to get page controller", p.name)
 	if p.page == nil {
 		LogError("[pas, %s] page is not ready", p.name)
 		return nil, ERR_NOT_FOUND_PAGE_OBJ
 	} else {
-		LogInfo("[pas, %s] got page", p.name)
+		LogDebug("[pas, %s] got page", p.name)
 		return p.page, nil
 	}
 }
@@ -36,9 +36,9 @@ func (p *PASpider) WaitPageReady() error {
 		return err
 	}
 
-	LogInfo("[pas, %s] wait page loading...", p.name)
+	LogDebug("[pas, %s] wait page loading...", p.name)
 	page.WaitNavigation(proto.PageLifecycleEventNameDOMContentLoaded)()
-	LogInfo("[pas, %s] page loaded", p.name)
+	LogDebug("[pas, %s] page loaded", p.name)
 	return nil
 }
 

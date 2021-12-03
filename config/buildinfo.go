@@ -67,23 +67,23 @@ type BuildInfoList map[string]*BuildInfoItem
 
 func (i *BuildInfoList) PrintBarometer() {
 	fmt.Println("")
-	LogInfo(output.BAROMETER_TITLE)
+	LogDebug(output.BAROMETER_TITLE)
 	for k, v := range *i {
-		// LogInfo("Build Info of %s", k)
+		// LogDebug("Build Info of %s", k)
 		s, _ := v.GetBarometerWeather(k)
-		LogInfo(s)
+		LogDebug(s)
 	}
 }
 
 func UnmarshalBuildInfoList(f io.Reader) (*BuildInfoList, error) {
-	LogInfo("[config/package] try to resolve package info")
-	LogInfo("[config/package] resolve...")
+	LogDebug("[config/package] try to resolve package info")
+	LogDebug("[config/package] resolve...")
 
 	var config *BuildInfoList
 	return config, json.UnmarshalJsonc(f, &config)
 }
 
 func MarshalBuildInfoList(o *BuildInfoList, w io.Writer) error {
-	LogInfo("[config/package] marshal pkg info list...")
+	LogDebug("[config/package] marshal pkg info list...")
 	return json.MarshalJsonToWriter(o, w)
 }

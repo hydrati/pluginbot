@@ -42,14 +42,14 @@ type ExternalScraperOptions struct {
 }
 
 func ResolveTaskFromPath(path string) (*Task, error) {
-	LogInfo("[config/task] try to resolve task config")
-	LogInfo("[config/task] check file")
+	LogDebug("[config/task] try to resolve task config")
+	LogDebug("[config/task] check file")
 	_, err := os.Stat(path)
 	if err != nil {
 		LogError("[config/task] check file error")
 		return nil, err
 	}
-	LogInfo("[config/build] resolve...")
+	LogDebug("[config/build] resolve...")
 	f, err := os.Open(path)
 	if err != nil {
 		LogError("[config/task] open file error")
@@ -62,5 +62,6 @@ func ResolveTaskFromPath(path string) (*Task, error) {
 		LogError("[config/task] resolve task error")
 		return nil, err
 	}
+	LogDebug("[config/task] resolved, name = %s", config.Name)
 	return config, nil
 }

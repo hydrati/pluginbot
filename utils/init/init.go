@@ -24,8 +24,8 @@ func StartupInit() {
 }
 
 func PrintRuntimeInfo() {
-	LogInfo("[init] compiler version: %v, %v", runtime.Version(), runtime.Compiler)
-	LogInfo("[init] os platform: %v+%v", runtime.GOOS, runtime.GOARCH)
+	LogDebug("[init] compiler version: %v, %v", runtime.Version(), runtime.Compiler)
+	LogDebug("[init] os platform: %v+%v", runtime.GOOS, runtime.GOARCH)
 }
 
 func PlatformCheck() error {
@@ -37,13 +37,13 @@ func PlatformCheck() error {
 }
 
 func LookupBuildTools() {
-	LogInfo("[init] look up build tools...")
+	LogDebug("[init] look up build tools...")
 
 	if _, err := os.Stat("./tools/"); os.IsNotExist(err) {
 		LogError("[init] not found build tools")
 		Must(err)
 	}
-	LogInfo("[init] found build tools")
+	LogDebug("[init] found build tools")
 	os.Setenv("PATH", os.Getenv("PATH")+";./tools/")
-	LogInfo("[init] added to path")
+	LogDebug("[init] added to path")
 }

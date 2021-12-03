@@ -12,19 +12,19 @@ func (p *PASpider) GetAppTitle() (string, error) {
 	if err != nil {
 		return "", err
 	}
-	LogInfo("[pas, %s] get page title...", p.name)
+	LogDebug("[pas, %s] get page title...", p.name)
 	tnode, err := page.Element("#page-title")
 	if err != nil {
 		return "", err
 	}
 
-	LogInfo("[pas, %s] get page title text...", p.name)
+	LogDebug("[pas, %s] get page title text...", p.name)
 	text, err := tnode.Text()
 	if err != nil {
 		return "", err
 	}
 
-	LogInfo("[pas, %s] got page title text", p.name)
+	LogDebug("[pas, %s] got page title text", p.name)
 	return text, nil
 }
 
@@ -33,7 +33,7 @@ func (p *PASpider) GetDownloadBox() (*rod.Element, error) {
 	if err != nil {
 		return nil, err
 	}
-	LogInfo("[pas, %s] get default download box", p.name)
+	LogDebug("[pas, %s] get default download box", p.name)
 	return page.Element(".download-box")
 }
 
@@ -43,11 +43,11 @@ func (p *PASpider) GetFirstMD5() (string, error) {
 		return "", err
 	}
 
-	LogInfo("[pas, %s] try to get first md5", p.name)
+	LogDebug("[pas, %s] try to get first md5", p.name)
 	var htag *rod.Element
 	for _, elem := range page.MustElements(`strong`) {
 		if m, err := regexp.MatchString(`(?i)MD5 Hash`, elem.MustText()); err == nil && m {
-			LogInfo("[pas, %s] found a md5 hash tag, %+v", p.name, elem)
+			LogDebug("[pas, %s] found a md5 hash tag, %+v", p.name, elem)
 			htag = elem
 			break
 		}
@@ -66,12 +66,12 @@ func (p *PASpider) GetFirstMD5() (string, error) {
 			return "", err
 		}
 		h := REXP_MD5_PATTERN.FindStringSubmatch(text0)
-		LogInfo("[pas, %s] found, try to match hash string, %+v", p.name, h)
+		LogDebug("[pas, %s] found, try to match hash string, %+v", p.name, h)
 		if len(h) > 1 {
 			text = h[1]
 		}
 	} else {
-		LogInfo("[pas, %s] not found first md5", p.name)
+		LogDebug("[pas, %s] not found first md5", p.name)
 	}
 
 	if len(text) != 32 {
@@ -89,7 +89,7 @@ func (p *PASpider) GetVersion() (string, error) {
 		return "", err
 	}
 
-	LogInfo("[pas, %s] try to get app version", p.name)
+	LogDebug("[pas, %s] try to get app version", p.name)
 
 	dlinfon, err := page.Element("p.download-info")
 	if err != nil {
@@ -104,7 +104,7 @@ func (p *PASpider) GetVersion() (string, error) {
 	}
 
 	ver := REXP_VERSION_PATTERN.FindString(dlinfo)
-	LogInfo("[pas, %s] found app version, %s", p.name, ver)
+	LogDebug("[pas, %s] found app version, %s", p.name, ver)
 
 	return ver, nil
 }

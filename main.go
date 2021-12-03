@@ -1,17 +1,13 @@
 package main
 
 import (
-	"fmt"
-	"os"
+	"time"
 
 	"github.com/hyroge/pluginbot/build/task"
 	"github.com/hyroge/pluginbot/config"
 	"github.com/hyroge/pluginbot/provider/paspider"
-	"github.com/hyroge/pluginbot/utils/aria2"
-	"github.com/hyroge/pluginbot/utils/aria2/notifier"
-	"github.com/hyroge/pluginbot/utils/json"
 	"github.com/hyroge/pluginbot/utils/output"
-	"github.com/hyroge/pluginbot/utils/slices"
+	"github.com/hyroge/pluginbot/utils/worker"
 
 	_ "github.com/hyroge/pluginbot/utils/init"
 	. "github.com/hyroge/pluginbot/utils/prelude"
@@ -24,73 +20,112 @@ type A struct {
 }
 
 func main() {
-	_ = paspider.MustLaunchBrowserDefault()
-	LogInfo("[main] browser ready")
-	LogInfo("%+v", config.FetchBuildConfig())
-	LogInfo("%s", output.BaroPrintByTimes("Firefox", 15, 0))
+	start_time := time.Now().Unix()
+	client := paspider.MustLaunchBrowserDefault()
+	LogInfo("started browser")
+	LogDebug("[main] browser ready")
+	LogDebug("%+v", config.FetchBuildConfig())
+	LogDebug("%s", output.BaroPrintByTimes("Firefox", 15, 0))
 
-	cfg := config.FetchBuildConfig()
+	//cfg := config.FetchBuildConfig()
 
-	f, err := os.Open(cfg.BuildInfoPath)
+	tasks, err := task.CheckResolveAllTaskInTasksFolder()
+	LogInfo("resolved all tasks")
+	// wg := sync.WaitGroup{}
 	Must(err)
-	defer f.Close()
 
-	db, err := config.UnmarshalBuildInfoList(f)
-	Must(err)
+	LogInfo("build with 64 threads...")
+	pool := worker.NewPool(64, tasks)
+	wait := pool.Run(func(job interface{}) interface{} {
+		task := job.(*config.Task)
+		if task.PAUrl == nil {
+			return nil
+		}
+		pa_entry, err := paspider.FetchEntry(client, paspider.CreatePageOptions{
+			URL: *task.PAUrl,
+		}, "Chinese (Simplified)", task.Name)
+		Must(err)
+		LogDebug("[pa, %s] %+v", task.Name, pa_entry)
+		return pa_entry
+	})
+	result := wait()
+	for i := result.Front(); i != nil; i = i.Next() {
+		LogInfo("Got, %+v", i.Value)
+	}
+	LogInfo("Ok, %d/%d", result.Len(), tasks.Len())
+	end_time := time.Now().Unix()
 
-	(*db)["Rufus"].PushRecentStatus(&config.BuildRecentStatus{
-		Time:            1,
-		TimeDescription: "114514",
-		Success:         false,
-		ErrorMessage:    "homo",
-	}, 3)
+	LogDebug("used %d s", (end_time - start_time))
 
-	db.PrintBarometer()
-	// fs.CopyDirRecursive("vendor", "vendor2", false)
-	// _, err = fs.ReadDirRecursive("vendor")
+	// for i := tasks.Front(); i != nil; i = i.Next() {
+	// 	task := i.Value.(*config.Task)
+	// 	if task.PAUrl != nil {
+	// 		wg.Add(1)
+	// 		go func() {
+	// 			pa_entry, err := paspider.FetchEntry(client, paspider.CreatePageOptions{
+	// 				URL: *task.PAUrl,
+	// 			}, "Chinese (Simplified)", task.Name)
+	// 			Must(err)
+	// 			LogDebug("[pa, %s] %+v", task.Name, pa_entry)
+	// 			wg.Done()
+	// 		}()
+	// 	}
+	// }
+
+	// wg.Wait()
+
+	// f, err := os.Open(cfg.BuildInfoPath)
+	// Must(err)
+	// defer f.Close()
+
+	// db, err := config.UnmarshalBuildInfoList(f)
+	// Must(err)
+	// db.PrintBarometer()
+	// // fs.CopyDirRecursive("vendor", "vendor2", false)
+	// // _, err = fs.ReadDirRecursive("vendor")
+	// // Must(err)
+
+	// fmt.Println(json.MarshalJsonToString(db))
+	// s := []string{"a", "ss", "bb"}
+	// LogDebug("%+v", slices.IncludeInSliceString(s, "ss"))
+	// fmt.Println(task.CheckResolveTaskFromPath("./tests/example.pa-task.json"))
+
+	// cmd := aria2.NewCmd("tools/aria2c.exe", cfg.Aria2SpawnArgs)
+	// Must(cmd.Start())
+
+	// handle := notifier.NewCallbackNotifier()
+	// client, err := aria2.NewClient(aria2.RpcOptions{
+	// 	Host:      cfg.Aria2Host,
+	// 	Port:      cfg.Aria2Port,
+	// 	Secret:    cfg.Aria2Secret,
+	// 	Transport: "ws",
+	// 	Timeout:   "1s",
+	// 	Notifier:  handle,
+	// })
 	// Must(err)
 
-	fmt.Println(json.MarshalJsonToString(db))
-	s := []string{"a", "ss", "bb"}
-	LogInfo("%+v", slices.IncludeInSliceString(s, "ss"))
-	fmt.Println(task.CheckResolveTaskFromPath("./tests/example.pa-task.json"))
+	// w := handle.CreateWaiter("DownloadStart", func(ev *notifier.NotifierEvent) bool {
+	// 	fmt.Printf("hhh: %+v\n", ev)
+	// 	return true
+	// })
 
-	cmd := aria2.NewCmd("tools/aria2c.exe", cfg.Aria2SpawnArgs)
-	Must(cmd.Start())
+	// go func() {
+	// 	guard, err := client.GetClient()
+	// 	Must(err)
+	// 	defer guard.Close() // unlock client!
 
-	handle := notifier.NewCallbackNotifier()
-	client, err := aria2.NewClient(aria2.RpcOptions{
-		Host:      cfg.Aria2Host,
-		Port:      cfg.Aria2Port,
-		Secret:    cfg.Aria2Secret,
-		Transport: "ws",
-		Timeout:   "1s",
-		Notifier:  handle,
-	})
-	Must(err)
+	// 	ver, err := guard.Get().GetVersion()
+	// 	Must(err)
+	// 	LogDebug("%+v", ver)
 
-	w := handle.CreateWaiter("DownloadStart", func(ev *notifier.NotifierEvent) bool {
-		fmt.Printf("hhh: %+v\n", ev)
-		return true
-	})
+	// 	_, err = guard.Get().AddURI([]string{"https://zfile.edgeless.top/s/ub3caa"})
+	// 	Must(err)
+	// }()
 
-	go func() {
-		guard, err := client.GetClient()
-		Must(err)
-		defer guard.Close() // unlock client!
+	// fmt.Println(w())
 
-		ver, err := guard.Get().GetVersion()
-		Must(err)
-		LogInfo("%+v", ver)
-
-		_, err = guard.Get().AddURI([]string{"https://zfile.edgeless.top/s/ub3caa"})
-		Must(err)
-	}()
-
-	fmt.Println(w())
-
-	defer Must(client.Close()) // close rpc client
-	defer Must(cmd.Close())    // close process at last
+	// defer Must(client.Close()) // close rpc client
+	// defer Must(cmd.Close())    // close process at last
 
 	// group := &sync.WaitGroup{}
 	// group.Add(2)
@@ -119,18 +154,18 @@ func main() {
 	// close(results)
 
 	// fmt.Println()
-	// LogInfo("[main] tasks done")
+	// LogDebug("[main] tasks done")
 	// fmt.Println("=========================")
 
 	// for entry := range results {
-	// 	LogInfo("got %+v", entry)
+	// 	LogDebug("got %+v", entry)
 	// }
 
 	// a, err := unarr.NewArchive("test.7z")
 	// if err != nil {
 	// 	panic(err)
 	// }
-	// LogInfo("%+v", a.List())
+	// LogDebug("%+v", a.List())
 	// defer a.Close()
 
 	// archive, err := lzmadec.NewArchive("test.7z")

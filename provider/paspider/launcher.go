@@ -11,28 +11,28 @@ import (
 type CreatePageOptions = proto.TargetCreateTarget
 
 const (
-	DEBUG = true
+	DEBUG = false
 )
 
 func LaunchBrowserDefault() (*rod.Browser, error) {
-	LogInfo("[pas-launcher] launch browser with default...")
+	LogDebug("[pas-launcher] launch browser with default...")
 	if DEBUG {
-		LogInfo("[pas-launcher] debug mode enabled")
+		LogDebug("[pas-launcher] debug mode enabled")
 	}
 	l, err := launcher.New().Headless(!DEBUG).Launch()
 	if err != nil {
 		LogError("[pas-launcher] launch error")
 		return nil, err
 	}
-	LogInfo("[pas-launcher] create browser controller...")
+	LogDebug("[pas-launcher] create browser controller...")
 	client := rod.New().ControlURL(l)
-	LogInfo("[pas-launcher] connect to browser...")
+	LogDebug("[pas-launcher] connect to browser...")
 	err = client.Connect()
 	if err != nil {
 		LogError("[pas-launcher] connect error")
 		return nil, err
 	}
-	LogInfo("[pas-launcher] browser ready")
+	LogDebug("[pas-launcher] browser ready")
 	return client, nil
 }
 

@@ -27,7 +27,7 @@ type PASpider struct {
 }
 
 func New(client *rod.Browser, opts proto.TargetCreateTarget, name string) (*PASpider, error) {
-	LogInfo("[pas, %s] creating paspider, %s", name, opts.URL)
+	LogDebug("[pas, %s] creating paspider, %s", name, opts.URL)
 	page, err := client.Page(opts)
 	if err != nil {
 		return nil, err

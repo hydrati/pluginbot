@@ -4,12 +4,12 @@ import (
 	"context"
 	"fmt"
 	"runtime"
+	"runtime/debug"
 	"sync"
 	"time"
-	"runtime/debug"
 )
 
-var LogInfo = func(event string, properties ...interface{}) {
+var LogDebug = func(event string, properties ...interface{}) {
 }
 
 var LogPanic = func(recovered interface{}, properties ...interface{}) interface{} {
@@ -89,7 +89,7 @@ func (executor *UnboundedExecutor) checkGoroutines() bool {
 	defer executor.activeGoroutinesMutex.Unlock()
 	for startFrom, count := range executor.activeGoroutines {
 		if count > 0 {
-			LogInfo("event!unbounded_executor.still waiting goroutines to quit",
+			LogDebug("event!unbounded_executor.still waiting goroutines to quit",
 				"startFrom", startFrom,
 				"count", count)
 			return false

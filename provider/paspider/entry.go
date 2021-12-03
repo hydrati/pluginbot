@@ -6,7 +6,7 @@ import (
 )
 
 func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, name string) (*SpiderResult, error) {
-	LogInfo("[pas, %s] start spider task", name)
+	LogDebug("[pas, %s] start spider task", name)
 	spider, err := New(client, opts, name)
 	if err != nil {
 		LogError("[pas, %s] create spider error", name)
@@ -33,16 +33,16 @@ func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, na
 	m, err := spider.GetLocalizationDownloads()
 
 	if err == nil {
-		LogInfo("[pas, %s] get localization downloads success", name)
+		LogDebug("[pas, %s] get localization downloads success", name)
 		if m[def_lang] != nil {
-			LogInfo("[pas, %s] got default lang, \n%+v", name, m[def_lang])
+			LogDebug("[pas, %s] got default lang, \n%+v", name, m[def_lang])
 			d := m[def_lang]
 			entry.Hash = d.Hash
 			entry.Url = d.Link
-			LogInfo("[pas, %s] got entry, return\n%+v", name, entry)
+			LogDebug("[pas, %s] got entry, return\n%+v", name, entry)
 			return entry, nil
 		} else {
-			LogInfo("[pas, %s] not found default lang link, fallback to first-url", name)
+			LogDebug("[pas, %s] not found default lang link, fallback to first-url", name)
 		}
 	}
 
@@ -51,7 +51,7 @@ func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, na
 		LogError("[pas, %s] get first md5 error", name)
 		return nil, err
 	}
-	LogInfo("[pas, %s] got first md5 hash", name)
+	LogDebug("[pas, %s] got first md5 hash", name)
 	entry.Hash = f
 
 	u, err := spider.GetFirstDownloadUrl()
@@ -59,9 +59,9 @@ func FetchEntry(client *rod.Browser, opts CreatePageOptions, def_lang string, na
 		LogError("[pas, %s] get first download url error", name)
 		return nil, err
 	}
-	LogInfo("[pas, %s] got first download url hash", name)
+	LogDebug("[pas, %s] got first download url hash", name)
 	entry.Url = u
 
-	LogInfo("[pas, %s] got entry, return\n%+v", name, entry)
+	LogDebug("[pas, %s] got entry, return\n%+v", name, entry)
 	return entry, nil
 }

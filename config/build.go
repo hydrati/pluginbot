@@ -12,7 +12,7 @@ var config *BuildConfig
 type BuildConfig struct {
 	EnableRemote   bool     `json:"enableRemote"`
 	IgnoreRemote   bool     `json:"ignoreRemote"`
-	TasksPath      string   `json:"dirTasks"`
+	TasksPath      string   `json:"dirTask"`
 	WorkspacePath  string   `json:"dirWorkshop"`
 	DistPath       string   `json:"dirBuilds"`
 	BuildInfoPath  string   `json:"pathDatabase"`
@@ -35,12 +35,12 @@ func FetchBuildConfig() *BuildConfig {
 func resolveBuildConfig() *BuildConfig {
 	args := FetchCmdArgs()
 
-	LogInfo("[config/build] try to resolve build config")
-	LogInfo("[config/build] check file")
+	LogDebug("[config/build] try to resolve build config")
+	LogDebug("[config/build] check file")
 	_, err := os.Stat(args.BuildConfig)
 	Must(err)
 
-	LogInfo("[config/build] resolve...")
+	LogDebug("[config/build] resolve...")
 	f, err := os.Open(args.BuildConfig)
 	Must(err)
 	defer f.Close()
