@@ -34,9 +34,9 @@ func main() {
 	// wg := sync.WaitGroup{}
 	Must(err)
 
-	LogInfo("build with 64 threads...")
+	LogInfo("build (64x)...")
 	pool := worker.NewPool(64, tasks)
-	wait := pool.Run(func(job interface{}) interface{} {
+	f := pool.Run(func(job interface{}) interface{} {
 		task := job.(*config.Task)
 		if task.PAUrl == nil {
 			return nil
@@ -48,14 +48,16 @@ func main() {
 		LogDebug("[pa, %s] %+v", task.Name, pa_entry)
 		return pa_entry
 	})
-	result := wait()
+	result, ok := f.Await()
+	MustOk(ok)
+
 	for i := result.Front(); i != nil; i = i.Next() {
 		LogInfo("Got, %+v", i.Value)
 	}
 	LogInfo("Ok, %d/%d", result.Len(), tasks.Len())
 	end_time := time.Now().Unix()
 
-	LogDebug("used %d s", (end_time - start_time))
+	LogInfo("used %d s", (end_time - start_time))
 
 	// for i := tasks.Front(); i != nil; i = i.Next() {
 	// 	task := i.Value.(*config.Task)

@@ -6,3 +6,10 @@ func Must(e error) {
 		panic(e)
 	}
 }
+
+func MustOk(e bool) {
+	if e != true {
+		LogError("oops! pluginbot crashed! (by must-ok)")
+		panic("val is not true")
+	}
+}

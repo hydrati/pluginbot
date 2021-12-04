@@ -13,6 +13,8 @@ type WorkerPool struct {
 	jobs   *list.List
 	cur    *list.Element
 	result *list.List
+	future *WorkerPoolFuture
+	ch     chan *list.List
 	count  int
 	run    bool
 	done   bool
@@ -20,20 +22,25 @@ type WorkerPool struct {
 }
 
 func NewPool(count int, jobs *list.List) *WorkerPool {
-	return &WorkerPool{&sync.WaitGroup{}, &sync.Mutex{}, jobs, jobs.Front(), list.New(), count, false, false, 0}
+	p := &WorkerPool{&sync.WaitGroup{}, &sync.Mutex{}, jobs, jobs.Front(), list.New(), nil, nil, count, false, false, 0}
+	future, ch := newFuture(p.wg)
+	p.future = future
+	p.ch = ch
+
+	return p
 }
 
-func (p *WorkerPool) Lock() {
+func (p *WorkerPool) lock() {
 	p.mutex.Lock()
 }
 
-func (p *WorkerPool) Unlock() {
+func (p *WorkerPool) unlock() {
 	p.mutex.Unlock()
 }
 
-func (p *WorkerPool) Pull() *list.Element {
-	p.Lock()
-	defer p.Unlock()
+func (p *WorkerPool) pull() *list.Element {
+	p.lock()
+	defer p.unlock()
 
 	job := p.cur
 	if job != nil {
@@ -43,18 +50,21 @@ func (p *WorkerPool) Pull() *list.Element {
 	return job
 }
 
-func (p *WorkerPool) Done(result interface{}) {
-	p.Lock()
-	defer p.Unlock()
+func (p *WorkerPool) resolve(result interface{}) {
+	p.lock()
+	defer p.unlock()
 
 	p.result.PushBack(result)
+	if p.result.Len() >= p.jobs.Len() {
+		p.ch <- p.result
+	}
 
 	p.wg.Done()
 }
 
 func (p *WorkerPool) IsDone() bool {
-	p.Lock()
-	defer p.Unlock()
+	p.lock()
+	defer p.unlock()
 	if !p.done {
 		p.done = p.gots >= p.jobs.Len()
 	}
@@ -62,9 +72,32 @@ func (p *WorkerPool) IsDone() bool {
 }
 
 type WorkerFunc func(interface{}) interface{}
+type WorkerPoolAwaiter func() (*list.List, bool)
 
-// returns result waiter
-func (p *WorkerPool) Run(f WorkerFunc) func() *list.List {
+type WorkerPoolFuture struct {
+	wg *sync.WaitGroup
+	ch chan *list.List
+}
+
+func newFuture(wg *sync.WaitGroup) (*WorkerPoolFuture, chan *list.List) {
+	ch := make(chan *list.List, 1)
+	return &WorkerPoolFuture{wg, ch}, ch
+}
+
+func (p *WorkerPoolFuture) GetAwaiter() WorkerPoolAwaiter {
+	return func() (*list.List, bool) {
+		p.wg.Wait()
+		close(p.ch)
+		val, ok := <-p.ch
+		return val, ok
+	}
+}
+
+func (p *WorkerPoolFuture) Await() (*list.List, bool) {
+	return p.GetAwaiter()()
+}
+
+func (p *WorkerPool) Run(f WorkerFunc) *WorkerPoolFuture {
 	if !p.run {
 		p.wg.Add(p.jobs.Len())
 		for i := 0; i < p.count; i += 1 {
@@ -76,9 +109,9 @@ func (p *WorkerPool) Run(f WorkerFunc) func() *list.List {
 				}()
 				for {
 					if !p.IsDone() {
-						job := p.Pull()
+						job := p.pull()
 						if job != nil {
-							p.Done(f(job.Value))
+							p.resolve(f(job.Value))
 						}
 					} else {
 						return
@@ -87,10 +120,7 @@ func (p *WorkerPool) Run(f WorkerFunc) func() *list.List {
 			}(i)
 		}
 		p.run = true
-		return func() *list.List {
-			p.wg.Wait()
-			return p.result
-		}
+		return p.future
 	} else {
 		panic("pool running")
 	}
