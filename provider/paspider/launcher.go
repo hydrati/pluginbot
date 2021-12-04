@@ -10,9 +10,13 @@ import (
 
 type CreatePageOptions = proto.TargetCreateTarget
 
-const (
-	DEBUG = false
+var (
+	DEBUG bool
 )
+
+func init() {
+	DEBUG = FetchCmdArgs().Debug
+}
 
 func LaunchBrowserDefault() (*rod.Browser, error) {
 	LogDebug("[pas-launcher] launch browser with default...")
