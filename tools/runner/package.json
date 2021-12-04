@@ -3,6 +3,9 @@
     "version": "0.1.1",
     "private": true,
     "main": "index.js",
+    "scripts": {
+        "run": "ts-node ./src/main.ts"
+    },
     "dependencies": {
         "@rollup/plugin-alias": "^3.1.8",
         "@rollup/plugin-commonjs": "^21.0.1",
