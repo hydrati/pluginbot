@@ -1,123 +1,67 @@
 package task
 
 import (
-	"container/list"
-	"errors"
 	"os"
-	"path"
 
-	"github.com/hyroge/pluginbot/config"
-	"github.com/hyroge/pluginbot/utils/fs"
+	"github.com/hyroge/pluginbot/utils/json"
 	. "github.com/hyroge/pluginbot/utils/prelude"
-	"github.com/hyroge/pluginbot/utils/slices"
 )
 
 var (
-	ERR_CANNOT_ACCESS       = errors.New("cannot access the path")
-	ERR_INVALID_CATE        = errors.New("invalid category")
-	ERR_TASK_NAME_NOT_EQUAL = errors.New("the task name in path is not equal to the task name in config")
+	TASK_CATEGORIES = []string{"实用工具", "开发辅助", "配置检测", "资源管理", "办公编辑", "输入法", "集成开发", "录屏看图", "磁盘数据", "安全急救", "网课会议", "即时通讯", "安装备份", "游戏娱乐", "运行环境", "压缩镜像", "美化增强", "驱动管理", "下载上传", "浏览器", "影音播放", "远程连接"}
 )
 
-func CheckResolveAllTaskInTasksFolder() (*list.List /* List[*Task] */, error) {
-	cfg := config.FetchBuildConfig()
-	return CheckResolveAllTaskInFolder(cfg.TasksPath)
+type Task struct {
+	Name     string `json:"name"`
+	Category string `json:"category"`
+	Author   string `json:"author"`
+
+	AutoMake        bool    `json:"autoMake"`
+	LaunchArgs      *string `json:"launchArgs"`
+	ExternalScraper *bool   `json:"externalScraper"`
+	PAUrl           *string `json:"paUrl"`
+	PreProcess      *bool   `json:"preprocess"`
+
+	BuildRequirement       *[]string               `json:"buildRequirement"`
+	ReleaseRequirement     *[]string               `json:"releaseRequirement"`
+	ExternalScraperOptions *ExternalScraperOptions `json:"externalScraperOptions"`
 }
 
-func CheckResolveAllTaskInFolder(p string) (*list.List /* List[*Task] */, error) {
-	if e, err := fs.IsDirectory(p); err != nil || !e {
-		return nil, fs.ERR_INVALID_DIR
-	}
-
-	entries, err := os.ReadDir(p)
-	if err != nil {
-		return nil, err
-	}
-
-	tasks := list.New()
-
-	for _, entry := range entries {
-		if entry.IsDir() {
-			task, err := CheckResolveTaskFromTasksFolder(entry.Name())
-			if err != nil {
-				return nil, err
-			}
-
-			tasks.PushBack(task)
-		} else {
-			continue
-		}
-	}
-
-	return tasks, nil
-}
-
-func CheckResolveTaskFromTasksFolder(name string) (*config.Task, error) {
-	cfg := config.FetchBuildConfig()
-	task_path := path.Join(cfg.TasksPath, name)
-	task_cfg := path.Join(task_path, "config.json")
-
-	if !(fs.IsAccessible(task_path) || fs.IsAccessible(task_cfg)) {
-		return nil, ERR_CANNOT_ACCESS
-	}
-
-	task, err := CheckResolveTaskFromPath(task_cfg)
-	if err != nil {
-		return nil, err
-	}
-
-	if task.Name != name {
-		return nil, ERR_TASK_NAME_NOT_EQUAL
-	}
-
-	return task, nil
-}
-
-func CheckResolveTaskFromPath(p string) (*config.Task, error) {
-	task, err := config.ResolveTaskFromPath(p)
-	if err != nil {
-		return nil, err
-	}
-
-	if IsNil(task.ExternalScraper) && *task.ExternalScraper {
-		if err = CheckExternalScraperOptions(task); err != nil {
-			return nil, err
-		}
-	}
-
-	if !slices.IncludeInSliceString(config.TASK_CATEGORIES, task.Category) {
-		return nil, ERR_INVALID_CATE
-	}
-
-	return task, nil
-}
-
-var (
-	ERR_ES_CFG_NEED_POLICY    = errors.New("need provide externalScraperOptions.policy as external scraper task")
-	ERR_ES_CFG_UNKNOWN_POLICY = errors.New("unknown policy")
-	ERR_ES_CFG_NEED_BUILD_REQ = errors.New("need provide buildRequirement as external scraper task with make.cmd")
-	ERR_ES_CFG_NEED_REL_REQ   = errors.New("need provide releaseRequirement as external scraper task with make.cmd")
+const (
+	ES_POLICY_SILENT = "silent"
+	ES_POLICY_MANUAL = "manual"
 )
 
-func CheckExternalScraperOptions(task *config.Task) error {
-	if task.AutoMake {
-		if task.ExternalScraperOptions.Policy == nil {
-			return ERR_ES_CFG_NEED_POLICY
-		}
-		x := *(task.ExternalScraperOptions.Policy) != config.ES_POLICY_MANUAL
-		if x || *(task.ExternalScraperOptions.Policy) != config.ES_POLICY_SILENT {
-			return ERR_ES_CFG_UNKNOWN_POLICY
-		}
-	} else {
-		if task.BuildRequirement == nil {
-			return ERR_ES_CFG_NEED_BUILD_REQ
-		}
-	}
+type ExternalScraperOptions struct {
+	Policy             *string `json:"policy"`
+	ReleaseInstaller   *bool   `json:"releaseInstaller"`
+	SilentArg          *string `json:"silentArg"`
+	CompressLevel      *uint8  `json:"compressLevel"`
+	SlientDelete       *bool   `json:"slientDelete"`
+	ManualShortcutName *string `json:"manualShortcutName"`
+}
 
-	if task.ExternalScraperOptions.ReleaseInstaller != nil {
-		if *task.ExternalScraperOptions.ReleaseInstaller && task.ReleaseRequirement == nil {
-			return ERR_ES_CFG_NEED_REL_REQ
-		}
+func ResolveTaskFromPath(path string) (*Task, error) {
+	LogDebug("[config/task] try to resolve task config")
+	LogDebug("[config/task] check file")
+	_, err := os.Stat(path)
+	if err != nil {
+		LogError("[config/task] check file error")
+		return nil, err
 	}
-
-	return nil
+	LogDebug("[config/build] resolve...")
+	f, err := os.Open(path)
+	if err != nil {
+		LogError("[config/task] open file error")
+		return nil, err
+	}
+	defer f.Close()
+	var config *Task
+	err = json.UnmarshalJsonc(f, &config)
+	if err != nil {
+		LogError("[config/task] resolve task error")
+		return nil, err
+	}
+	LogDebug("[config/task] resolved, name = %s", config.Name)
+	return config, nil
 }

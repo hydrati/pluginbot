@@ -37,7 +37,7 @@ func main() {
 	LogInfo("build (64x)...")
 	pool := worker.NewPool(64, tasks)
 	f := pool.Run(func(job interface{}) interface{} {
-		task := job.(*config.Task)
+		task := job.(*task.Task)
 		if task.PAUrl == nil {
 			return nil
 		}
